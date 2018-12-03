@@ -7,7 +7,7 @@ task validateMongoScripts {
         fileTree('.').filter{it.name.endsWith('.js')}.files.forEach{ file->
             file.eachLine { line ->
                 // if a line is appended with  'NOVALIDATION' we ignore it
-                if (!line..trim().endsWith('NOVALIDATION') && line.contains('new Mongo()')) {
+                if (!line.trim().endsWith('NOVALIDATION') && line.contains('new Mongo()')) {
                     throw new IllegalStatementException("Illegal statement found in file $file.name")
 
                 }
