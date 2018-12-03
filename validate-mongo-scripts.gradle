@@ -1,24 +1,28 @@
-
 task validateMongoScripts {
-    description 'Check if monogo migration scripts do not contain illegal statements'
+    description 'Check if mongo migration scripts do not contain illegal statements'
     doFirst {
-        println 'Hello World'
 
-        fileTree('.').filter{it.name.endsWith('.js')}.files.forEach{ file->
+        def invalidFiles = new ArrayList<String>()
+
+        fileTree('.').filter { it.name.endsWith('.js') }.files.forEach { file ->
+            int i = 0
             file.eachLine { line ->
+                i++
                 // if a line is appended with  'NOVALIDATION' we ignore it
                 if (!line.trim().endsWith('NOVALIDATION') && line.contains('new Mongo()')) {
-                    throw new IllegalStatementException("Illegal statement found in file $file.name")
-
+                    invalidFiles.add("$file.name @ L$i")
                 }
             }
+        }
+
+        if (!invalidFiles.isEmpty()) {
+            invalidFiles.each { fileAndLineNumber ->
+                println fileAndLineNumber
+            }
+
+            throw new Exception("Illegal statement found in files")
         }
 
     }
 }
 
-class IllegalStatementException extends GradleException {
-    IllegalStatementException(String message) {
-        super(message)
-    }
-}
